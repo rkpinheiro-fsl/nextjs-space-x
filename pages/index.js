@@ -1,8 +1,12 @@
 import Head from "next/head";
 import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
+import React from "react";
+import Link from "next/link";
+import { signIn, signOut, useSession } from "next-auth/client";
 import styles from "../styles/Home.module.css";
 
 export default function Home({ launches }) {
+  const [session, loading] = useSession();
   return (
     <div className={styles.container}>
       <Head>
@@ -15,21 +19,37 @@ export default function Home({ launches }) {
 
         <p className={styles.description}>Latest launches from SpaceX</p>
 
-        <div className={styles.grid}>
-          {launches.map((launch) => (
-            <a
-              key={launch.id}
-              href={launch.links.video_link}
-              className={styles.card}
-            >
-              <h3>{launch.mission_name}</h3>
-              <p>
-                <strong>Launch Time:</strong>{" "}
-                {new Date(launch.launch_date_local).toLocaleDateString("en-US")}
-              </p>
-            </a>
-          ))}
-        </div>
+        {!session && (
+          <>
+            Not signed in <br />
+            <button onClick={signIn}>Sign In</button>
+          </>
+        )}
+
+        {session && (
+          <>
+            Signed in as {session.user.name}
+            <br />
+            <button onClick={signOut}>Sign out</button>
+            <div className={styles.grid}>
+              {launches.map((launch) => (
+                <a
+                  key={launch.id}
+                  href={launch.links.video_link}
+                  className={styles.card}
+                >
+                  <h3>{launch.mission_name}</h3>
+                  <p>
+                    <strong>Launch Time:</strong>{" "}
+                    {new Date(launch.launch_date_local).toLocaleDateString(
+                      "en-US"
+                    )}
+                  </p>
+                </a>
+              ))}
+            </div>
+          </>
+        )}
       </main>
 
       <footer className={styles.footer}>
